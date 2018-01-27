@@ -1,7 +1,7 @@
 package com.yangwenjie.delayqueue.core;
 
 import com.yangwenjie.delayqueue.utils.RedissonUtils;
-import org.redisson.api.RList;
+import org.redisson.api.RBlockingQueue;
 
 /**
  * 存放可以消费的jod
@@ -10,8 +10,23 @@ import org.redisson.api.RList;
  */
 public class ReadyQueue {
 
-    public static void push(String tpic,long delayQueueJodId) {
-        RList<Object> rList = RedissonUtils.getList(tpic);
-        //rList.
+    /**
+     * 添加jodid到准备队列
+     * @param topic
+     * @param delayQueueJodId
+     */
+    public static void pushToReadyQueue(String topic,long delayQueueJodId) {
+        RBlockingQueue<Long> rBlockingQueue = RedissonUtils.getBlockingQueue(topic);
+        rBlockingQueue.offer(delayQueueJodId);
+    }
+
+    /**
+     * 从准备队列中获取jodid
+     * @param topic
+     * @return
+     */
+    public static Long pollFormReadyQueue(String topic) {
+        RBlockingQueue<Long> rBlockingQueue = RedissonUtils.getBlockingQueue(topic);
+        return rBlockingQueue.poll();
     }
 }
