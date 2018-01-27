@@ -1,7 +1,7 @@
 # delay-queue
 redis实现延迟消息队列
 
-###需求背景
+#### 需求背景
 &nbsp;&nbsp;&nbsp;&nbsp;最近在做一个排队取号的系统
 * 在用户预约时间到达前XX分钟发短信通知
 * 在用户预约时间结束时要判断用户是否去取号了，不然就记录为爽约
@@ -14,11 +14,12 @@ redis实现延迟消息队列
 
 基于Redis实现的延迟队列java版, 参考[有赞延迟队列](https://tech.youzan.com/queuing_delay/)设计实现
 
-###整体结构
+#### 整体结构
 整个延迟队列由4个部分组成：
 
 1. JobPool用来存放所有Job的元信息。
 2. DelayBucket是一组以时间为维度的有序队列，用来存放所有需要延迟的Job（这里只存放Job Id）。
 3. Timer负责实时扫描各个Bucket，并将delay时间大于等于当前时间的Job放入到对应的Ready Queue。
 4. ReadyQueue存放处于Ready状态的Job（这里只存放JobId），以供消费程序消费。
+
 !(https://tech.youzan.com/content/images/2016/03/all-1.png)
