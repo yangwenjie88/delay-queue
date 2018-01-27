@@ -60,4 +60,4 @@ redis实现延迟消息队列
 第8次通知失败, N += 1 => 9, 取不到间隔时间, 结束通知
 
 #### 引用说明
-[参考有赞延迟队列](https://tech.youzan.com/queuing_delay/)设计实现
+参考[有赞延迟队列](https://tech.youzan.com/queuing_delay/)思路设计实现
