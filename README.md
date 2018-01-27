@@ -22,4 +22,4 @@ redis实现延迟消息队列
 3. Timer负责实时扫描各个Bucket，并将delay时间大于等于当前时间的Job放入到对应的Ready Queue。
 4. ReadyQueue存放处于Ready状态的Job（这里只存放JobId），以供消费程序消费。
 
-!(https://tech.youzan.com/content/images/2016/03/all-1.png)
+![结构图](https://tech.youzan.com/content/images/2016/03/all-1.png)
