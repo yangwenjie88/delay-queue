@@ -23,3 +23,23 @@ redis实现延迟消息队列
 4. ReadyQueue存放处于Ready状态的Job（这里只存放JobId），以供消费程序消费。
 
 ![结构图](https://tech.youzan.com/content/images/2016/03/all-1.png)
+
+#### 消息结构
+每个Job必须包含一下几个属性：
+
+1. topic：Job类型。可以理解成具体的业务名称。
+2. id：Job的唯一标识。用来检索和删除指定的Job信息。
+3. delayTime：jod延迟执行的时间，13位时间戳
+4. ttr（time-to-run)：Job执行超时时间。单位：秒。主要是为了消息可靠性
+5. message：Job的内容，供消费者做具体的业务处理，以json格式存储。
+
+#### 举例说明一个Job的生命周期
+1. 用户预约后，同时往JobPool里put一个job。job结构为：{‘topic':'book’, ‘id':'123456’, ‘delayTime’:1517069375398 ,’ttrTime':60 , ‘message':’XXXXXXX’}
+  同时以jodId作为value，delayTime作为score 存到bucket 中，用jodId取模，放到10个bucket中，以提高效率
+  
+2. timer每时每刻都在轮询各个bucket，按照score排序去最小的一个，当delayTime < 当前时间后，，取得job id从job pool中获取元信息。
+如果这时该job处于deleted状态，则pass，继续做轮询；如果job处于非deleted状态，首先再次确认元信息中delay是否大于等于当前时间，
+如果满足则根据topic将jobId放入对应的ready queue，然后从bucket中移除,并且；如果不满足则重新计算delay时间，再次放入bucket，并将之前的job id从bucket中移除。
+
+3. 消费端轮询对应的topic的ready queue，获取job后做自己的业务逻辑。与此同时，服务端将已经被消费端获取的job按照其设定的TTR，重新计算执行时间，并将其放入bucket。
+消费端处理完业务后向服务端响应finish，服务端根据job id删除对应的元信息。如果消费端在ttr时间内没有响应，则ttr时间后会再收到该消息
