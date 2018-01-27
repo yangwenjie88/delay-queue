@@ -48,10 +48,15 @@ public class DelayQueue {
             if (delayQueueJod == null) {
                 return null;
             } else {
-                //获取消费过去时间，重新放到延迟任务桶中
-                long ttrTime = System.currentTimeMillis()+delayQueueJod.getTtrTime()*1000L;
-                ScoredSortedItem item = new ScoredSortedItem(delayQueueJod.getId(), ttrTime);
+                long delayTime = delayQueueJod.getDelayTime();
+                //获取消费超时时间，重新放到延迟任务桶中
+                long reDelayTime = System.currentTimeMillis()+delayQueueJod.getTtrTime()*1000L;
+                delayQueueJod.setDelayTime(reDelayTime);
+                DelayQueueJobPool.addDelayQueueJod(delayQueueJod);
+                ScoredSortedItem item = new ScoredSortedItem(delayQueueJod.getId(), reDelayTime);
                 DelayBucket.addToBucket(getDelayBucketKey(delayQueueJod.getId()),item);
+                //返回的时候设置回
+                delayQueueJod.setDelayTime(delayTime);
                 return delayQueueJod;
             }
         }
@@ -63,6 +68,20 @@ public class DelayQueue {
      */
     public static void delete(long delayQueueJodId) {
         DelayQueueJobPool.deleteDelayQueueJod(delayQueueJodId);
+    }
+
+    /**
+     *
+     * @param delayQueueJodId
+     */
+    public static void finish(long delayQueueJodId) {
+        DelayQueueJob delayQueueJod = DelayQueueJobPool.getDelayQueueJod(delayQueueJodId);
+        if (delayQueueJod == null) {
+            return;
+        }
+        DelayQueueJobPool.deleteDelayQueueJod(delayQueueJodId);
+        ScoredSortedItem item = new ScoredSortedItem(delayQueueJod.getId(), delayQueueJod.getDelayTime());
+        DelayBucket.deleteFormBucket(getDelayBucketKey(delayQueueJod.getId()),item);
     }
 
     /**

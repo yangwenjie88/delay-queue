@@ -1,0 +1,11 @@
+server:
+  port: 8080
+  connection-timeout: 10000
+ # context-path: /springboot
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+
+

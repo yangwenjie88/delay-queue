@@ -2,7 +2,6 @@ package com.yangwenjie.delayqueue.core;
 
 import com.yangwenjie.delayqueue.utils.RedissonUtils;
 import org.redisson.api.RScoredSortedSet;
-import org.redisson.api.RSortedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,11 @@ public class DelayBucket {
      * @return
      */
     public static ScoredSortedItem getFromBucket(String key) {
-        RScoredSortedSet<ScoredSortedItem> scoredSorteSet = RedissonUtils.getScoredSorteSet(key);
-        return scoredSorteSet.first();
+        RScoredSortedSet<ScoredSortedItem> scoredSortedSet = RedissonUtils.getScoredSorteSet(key);
+        if (scoredSortedSet.size() == 0) {
+            return null;
+        }
+        return scoredSortedSet.first();
     }
 
     /**

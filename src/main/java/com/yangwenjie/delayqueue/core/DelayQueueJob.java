@@ -1,5 +1,8 @@
 package com.yangwenjie.delayqueue.core;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 /**
  * 延迟任务
  * @author Yang WenJie
@@ -10,6 +13,7 @@ public class DelayQueueJob {
     /**
      * 延迟任务的唯一标识，用于检索任务
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private long id;
 
     /**
