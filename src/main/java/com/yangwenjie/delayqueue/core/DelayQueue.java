@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 public class DelayQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(DelayQueue.class);
-    private static final String DELAY_BUCKET_KEY_PREFIX = "delayBucket";
-    private static final long  DELAY_BUCKET_NUM = 10L;
+    public static final String DELAY_BUCKET_KEY_PREFIX = "delayBucket";
+    public static final long  DELAY_BUCKET_NUM = 10L;
 
     /**
      * 获取delayBucket key 分开多个，有利于提高效率
