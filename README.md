@@ -12,7 +12,7 @@ redis实现延迟消息队列
 
 经过一番搜索，网上说rabbitmq可以满足延迟执行需求，但是目前系统用了其他消息中间件，所以不打算用。
 
-基于Redis实现的延迟队列java版, 参考[有赞延迟队列](https://tech.youzan.com/queuing_delay/)设计实现
+基于Redis实现的延迟消息队列java版，项目地址：[githu](https://github.com/yangwenjie88/delay-queue)
 
 #### 整体结构
 整个延迟队列由4个部分组成：
@@ -35,7 +35,7 @@ redis实现延迟消息队列
 
 #### 举例说明一个Job的生命周期
 1. 用户预约后，同时往JobPool里put一个job。job结构为：{‘topic':'book’, ‘id':'123456’, ‘delayTime’:1517069375398 ,’ttrTime':60 , ‘message':’XXXXXXX’}
-  同时以jodId作为value，delayTime作为score 存到bucket 中，用jodId取模，放到10个bucket中，以提高效率
+  同时以jobId作为value，delayTime作为score 存到bucket 中，用jodId取模，放到10个bucket中，以提高效率
   
 2. timer每时每刻都在轮询各个bucket，按照score排序去最小的一个，当delayTime < 当前时间后，，取得job id从job pool中获取元信息。
 如果这时该job处于deleted状态，则pass，继续做轮询；如果job处于非deleted状态，首先再次确认元信息中delay是否大于等于当前时间，
@@ -43,3 +43,21 @@ redis实现延迟消息队列
 
 3. 消费端轮询对应的topic的ready queue，获取job后做自己的业务逻辑。与此同时，服务端将已经被消费端获取的job按照其设定的TTR，重新计算执行时间，并将其放入bucket。
 消费端处理完业务后向服务端响应finish，服务端根据job id删除对应的元信息。如果消费端在ttr时间内没有响应，则ttr时间后会再收到该消息
+
+#### 后续扩展
+1. 加上超时重发次数
+
+实现思路
+任务job内容包含Array{0,0,2m,10m,10m,1h,2h,6h,15h}和通知到第几次N(这里N=1, 即第1次).
+消费者从队列中取出任务, 根据N取得对应的时间间隔为0, 立即发送通知.
+
+第1次通知失败, N += 1 => 2
+从Array中取得间隔时间为2m, 添加一个延迟时间为2m的任务到延迟队列, 任务内容仍包含Array和N
+
+第2次通知失败, N += 1 => 3, 取出对应的间隔时间10m, 添加一个任务到延迟队列, 同上
+......
+第7次通知失败, N += 1 => 8, 取出对应的间隔时间15h, 添加一个任务到延迟队列, 同上
+第8次通知失败, N += 1 => 9, 取不到间隔时间, 结束通知
+
+#### 引用说明
+[参考有赞延迟队列](https://tech.youzan.com/queuing_delay/)设计实现
