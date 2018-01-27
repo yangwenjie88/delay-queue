@@ -12,7 +12,7 @@ redis实现延迟消息队列
 
 经过一番搜索，网上说rabbitmq可以满足延迟执行需求，但是目前系统用了其他消息中间件，所以不打算用。
 
-基于Redis实现的延迟消息队列java版，：[delay-queue](https://github.com/yangwenjie88/delay-queue)
+基于Redis实现的延迟消息队列java版：[delay-queue](https://github.com/yangwenjie88/delay-queue)
 
 #### 整体结构
 整个延迟队列由4个部分组成：
